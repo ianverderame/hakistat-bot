@@ -1,4 +1,3 @@
-// reactions/minus.js
 module.exports = {
     name: 'subtract Haki point',
     minusEmoji: 'emoji_2',

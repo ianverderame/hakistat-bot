@@ -1,6 +1,6 @@
 module.exports = {
-    name: 'add',
-    description: 'Add Haki points to a user (hakistat role only)',
+    name: 'minus',
+    description: 'Remove Haki points from a user (hakistat role only)',
 
     execute: async (message, args, supabase) => {
         const REQUIRED_ROLE = 'hakistat';
@@ -10,15 +10,15 @@ module.exports = {
         }
 
         if (args.length < 2) {
-            return message.reply('Usage: !add <discord_id_or_username> <points> <optional reason>');
+            return message.reply('Usage: !minus <discord_id_or_username> <points> <optional reason>');
         }
 
         const targetIdentifier = args[0];
         const points = parseInt(args[1], 10);
-        const reason = args.slice(2).join(' ') || 'Manual adjustment';
+        const reason = args.slice(2).join(' ') || 'Manual deduction';
 
-        if (isNaN(points)) {
-            return message.reply('Points must be a valid number.');
+        if (isNaN(points) || points <= 0) {
+            return message.reply('Points must be a positive number.');
         }
 
         const { data: profile, error } = await supabase
@@ -36,7 +36,7 @@ module.exports = {
             return message.reply(`No profile found for ${targetIdentifier}.`);
         }
 
-        const newTotal = (profile.total_haki_points ?? 0) + points;
+        const newTotal = (profile.total_haki_points ?? 0) - points;
 
         const { error: updateError } = await supabase
             .from('profiles')
@@ -53,7 +53,7 @@ module.exports = {
             .from('haki_point_transactions')
             .insert({
                 user_id: profile.user_id,
-                points_delta: points,
+                points_delta: -points,
                 reason,
                 awarded_by: message.author.id,
                 source: 'manual_command'
@@ -65,7 +65,7 @@ module.exports = {
         }
 
         message.reply(
-            `✅ ${points > 0 ? '+' : ''}${points} Haki point(s) applied to **${profile.username}**.\n` +
+            `➖ ${points} Haki point(s) removed from **${profile.username}**.\n` +
             `New total: **${newTotal}**`
         );
     }

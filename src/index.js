@@ -48,7 +48,7 @@ client.on('messageCreate', async (message) => {
     if (!command) return;
 
     try {
-        await command.execute(message, args);
+        await command.execute(message, args, supabase);
     } catch (err) {
         console.error(err);
         message.channel.send('There was an error executing that command.');
