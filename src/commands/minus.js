@@ -1,6 +1,7 @@
 module.exports = {
     name: 'minus',
     description: 'Remove Haki points from a user (hakistat role only)',
+    usage: '!minus <username>',
 
     execute: async (message, args, supabase) => {
         const REQUIRED_ROLE = 'hakistat';

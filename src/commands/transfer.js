@@ -1,7 +1,7 @@
 module.exports = {
   name: "transfer",
-  description:
-    "Transfer Haki points from one user to another (hakistat role only)",
+  description: "Transfer Haki points from one user to another (hakistat role only)",
+  usage: "!transfer <source_discord_id_or_username> <target_discord_id_or_username> <points> <optional reason>",
 
   execute: async (message, args, supabase) => {
     const REQUIRED_ROLE = "hakistat";

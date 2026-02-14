@@ -2,7 +2,9 @@ const supabase = require('../utils/supabase');
 
 module.exports = {
     name: 'check',
-    description: 'Check your or another user’s Haki points',
+    description: 'Check your or another user’s Haki points. If no username provided, your points will be displayed',
+    usage: '!check <optional username>',
+
     async execute(message, args) {
         let data;
 
