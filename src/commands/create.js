@@ -2,7 +2,9 @@ const supabase = require("../utils/supabase");
 
 module.exports = {
     name: 'create',
-    description: 'Add a user to the database',
+    description: 'Add a new user to the database',
+    usage: '!create <username>',
+
     async execute(message, args) {
         try {
           const profileName = args[0];

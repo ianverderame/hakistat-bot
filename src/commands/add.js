@@ -1,6 +1,7 @@
 module.exports = {
     name: 'add',
     description: 'Add Haki points to a user (hakistat role only)',
+    usage: '!add <discord_id_or_username> <points> <optional reason>',
 
     execute: async (message, args, supabase) => {
         const REQUIRED_ROLE = 'hakistat';

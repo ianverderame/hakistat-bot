@@ -2,7 +2,9 @@ const supabase = require('../utils/supabase');
 
 module.exports = {
     name: 'link',
-    description: 'Link your Discord account to your profile',
+    description: 'Link your Discord account to your existing profile. Check [the leaderboard](https://hakistat.com/points) to see if you\'re already on the list. If you are not, you will need to use the !create command',
+    usage: '!link <your username>',
+
     async execute(message, args) {
         const discordId = message.author.id;          // Permanent Discord ID
         // const discordUsername = message.author.username; // Optional, for display
