@@ -95,7 +95,7 @@ module.exports = {
         points_delta: -points,
         reason,
         awarded_by: message.author.username,
-        source: "manual_command",
+        source: "transfer_sender",
       });
     if (sourceInsertError) {
       console.error(sourceInsertError);
@@ -111,7 +111,7 @@ module.exports = {
         points_delta: points,
         reason,
         awarded_by: message.author.username,
-        source: "manual_command",
+        source: "transfer_receiver",
       });
     if (insertError) {
       console.error(insertError);
@@ -127,3 +127,4 @@ module.exports = {
     );
   },
 };
+
