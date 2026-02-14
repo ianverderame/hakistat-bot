@@ -44,7 +44,7 @@ module.exports = {
         }
 
         function formatCommand(command) {
-            return `**!${command.name}**\n${command.description}\nUsage: ${command.usage}\n`;
+            return `**!${command.name}**\n${command.description}\nUsage: ${command.usage}\n\n`;
         }
     }
 
