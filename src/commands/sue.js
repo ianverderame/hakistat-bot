@@ -1,6 +1,6 @@
 const supabase = require('../utils/supabase');
 
-const VOTE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const VOTE_DURATION_MS = 60 * 1000; // 5 minutes
 const REQUIRED_VOTES = 7;
 const GUILTY_EMOJI = 'emoji_2';
 const NOT_GUILTY_EMOJI = 'emoji_1';
