@@ -20,7 +20,7 @@ module.exports = {
         try {
             const { data: userData, error } = await supabase
                 .from('profiles')
-                .select('username, total_haki_points')
+                .select('username, total_haki_points, user_id')
                 .eq('discord_id', discordId)
                 .maybeSingle();
 
@@ -71,6 +71,21 @@ module.exports = {
                 message.channel.send(
                     `🪙 **Coinflip — LOSS!**\n${userData.username} gambled **${bet}** points and lost. (-${bet})\nNew balance: **${newPoints}** haki points.`
                 );
+            }
+                // Log transaction
+            const { error: logError } = await supabase
+                .from('haki_point_transactions')
+                .insert({
+                    user_id: userData.user_id,
+                    points_delta: won ? bet : -bet,
+                    reason: `Coinflip — ${won ? 'Win' : 'Loss'} (bet ${bet})`,
+                    awarded_by: 'hakistat bot',
+                    source: 'gamble'
+                });
+
+            if (logError) {
+                console.error(logError);
+                return message.channel.send('Points were updated but failed to log transaction.');
             }
 
         } catch (err) {
