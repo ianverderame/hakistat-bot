@@ -76,12 +76,17 @@ module.exports = {
             const { error: logError } = await supabase
                 .from('haki_point_transactions')
                 .insert({
-                    user_id: profile.user_id,
+                    user_id: discordId,
                     points_delta: won ? bet : -bet,
                     reason: `Coinflip — ${won ? 'Win' : 'Loss'} (bet ${bet})`,
                     awarded_by: 'hakistat bot',
                     source: 'gamble'
                 });
+
+            if (logError) {
+                console.error(logError);
+                return message.channel.send('Points were updated but failed to log transaction.');
+            }
 
         } catch (err) {
             console.error(err);
