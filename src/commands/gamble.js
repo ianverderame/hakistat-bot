@@ -20,7 +20,7 @@ module.exports = {
         try {
             const { data: userData, error } = await supabase
                 .from('profiles')
-                .select('username, total_haki_points')
+                .select('username, total_haki_points, user_id')
                 .eq('discord_id', discordId)
                 .maybeSingle();
 
@@ -76,7 +76,7 @@ module.exports = {
             const { error: logError } = await supabase
                 .from('haki_point_transactions')
                 .insert({
-                    user_id: discordId,
+                    user_id: userData.user_id,
                     points_delta: won ? bet : -bet,
                     reason: `Coinflip — ${won ? 'Win' : 'Loss'} (bet ${bet})`,
                     awarded_by: 'hakistat bot',
