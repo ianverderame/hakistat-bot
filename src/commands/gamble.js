@@ -34,6 +34,33 @@ module.exports = {
             }
 
             const currentPoints = userData.total_haki_points ?? 0;
+
+            // Check daily profit cap
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+
+            const { data: todayLogs, error: logsError } = await supabase
+                .from('haki_point_transactions')
+                .select('points_delta')
+                .eq('user_id', userData.user_id)
+                .eq('source', 'gamble')
+                .gte('created_at', todayStart.toISOString());
+
+            if (logsError) {
+                console.error(logsError);
+                return message.channel.send('Error checking daily profit limit.');
+            }
+
+            const todayProfit = todayLogs.reduce((sum, log) => sum + log.points_delta, 0);
+            const startingBalance = currentPoints - todayProfit;
+            const dailyCap = Math.floor(startingBalance * 0.5);
+
+            if (todayProfit >= dailyCap) {
+                return message.channel.send(
+                    `⚠️ You've reached your daily profit cap of **${dailyCap}** haki points (50% of your starting balance). Come back tomorrow!`
+                );
+            }
+
             const isNegative = currentPoints <= 0;
 
             // Apply restrictions for users with negative balance
