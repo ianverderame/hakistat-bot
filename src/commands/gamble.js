@@ -41,23 +41,32 @@ module.exports = {
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
 
-                const { data: todayLogs, error: logsError } = await supabase
+                const { data: todayGambleLogs, error: gambleLogsError } = await supabase
                     .from('haki_point_transactions')
                     .select('points_delta')
                     .eq('user_id', userData.user_id)
                     .eq('source', 'gamble')
                     .gte('created_at', todayStart.toISOString());
 
-                if (logsError) {
-                    console.error(logsError);
+                const { data: todayReactionLogs, error: reactionLogsError } = await supabase
+                    .from('haki_point_transactions')
+                    .select('points_delta')
+                    .eq('user_id', userData.user_id)
+                    .eq('source', 'discord_reaction')
+                    .gte('created_at', todayStart.toISOString());
+
+                if (gambleLogsError || reactionLogsError) {
+                    console.error(gambleLogsError || reactionLogsError);
                     return message.channel.send('Error checking daily profit limit.');
                 }
 
-                const todayProfit = todayLogs.reduce((sum, log) => sum + log.points_delta, 0);
-                const startingBalance = currentPoints - todayProfit;
+                const todayGambleProfit = todayGambleLogs.reduce((sum, log) => sum + log.points_delta, 0);
+                const todayReactionGains = todayReactionLogs.reduce((sum, log) => sum + log.points_delta, 0);
+
+                const startingBalance = currentPoints - todayGambleProfit - todayReactionGains;
                 const dailyCap = Math.floor(startingBalance * 0.5);
 
-                if (todayProfit >= dailyCap) {
+                if (todayGambleProfit >= dailyCap) {
                     return message.channel.send(
                         `⚠️ You've reached your daily profit cap of **${dailyCap}** haki points (50% of your starting balance). Come back tomorrow!`
                     );
