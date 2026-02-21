@@ -1,11 +1,13 @@
 const supabase = require('../utils/supabase');
 
-const VOTE_DURATION_MS = 60 * 1000; // 5 minutes
+const VOTE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const REQUIRED_VOTES = 7;
 const GUILTY_EMOJI = 'emoji_2';
 const NOT_GUILTY_EMOJI = 'emoji_1';
 const GUILTY_EMOJI_REACT = '<:emoji_2:1395041344971604090>';
 const NOT_GUILTY_EMOJI_REACT = '<:emoji_1:1395041317138202694>';
+const GUILTY_EMOJI_ID = '1395041344971604090'
+const NOT_GUILTY_EMOJI_ID = '1395041317138202694'
 
 // Track active lawsuits to prevent duplicates
 const activeLawsuits = new Set();
@@ -90,19 +92,13 @@ module.exports = {
 
             const collector = caseMsg.createReactionCollector({ filter, time: VOTE_DURATION_MS });
 
-            const votedUsers = new Set();
-            collector.on('collect', (reaction, user) => {
-                if (votedUsers.has(user.id)) return; // silently ignore duplicate votes
-                votedUsers.add(user.id);
-            });
-
             collector.on('end', async (collected) => {
                 activeLawsuits.delete(caseKey);
-
-                const guiltyVotes = collected.get(GUILTY_EMOJI_REACT)?.count - 1 ?? 0; // subtract bot's initial reaction
-                const notGuiltyVotes = collected.get(NOT_GUILTY_EMOJI_REACT)?.count - 1 ?? 0;
+                
+                const guiltyVotes = (collected.get(GUILTY_EMOJI_ID)?.count ?? 0);
+                const notGuiltyVotes = (collected.get(NOT_GUILTY_EMOJI_ID)?.count ?? 0);
                 const totalVotes = guiltyVotes + notGuiltyVotes;
-
+                
                 if (totalVotes < REQUIRED_VOTES) {
                     return message.channel.send(
                         `⚖️ **CASE DISMISSED**\n\nNot enough jurors voted. (${totalVotes}/${REQUIRED_VOTES} required)\nThe case against **${defendant.username}** has been dismissed.`
