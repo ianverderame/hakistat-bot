@@ -10,7 +10,7 @@ module.exports = {
         const leaderboardUrl = "https://hakistat.com/points";
 
         try {
-            const {targetCol, target} = args.length > 0 ? {targetCol: 'username', target: args[0]} : {tartargetColgetName: 'discord_id', target: message.author.id};
+            const {targetCol, target} = args.length > 0 ? {targetCol: 'username', target: args[0]} : {targetCol: 'discord_id', target: message.author.id};
             const { data: userData, error } = await supabase
                 .from('ranked_view')
                 .select('username, total_haki_points, rank, row_number')
@@ -19,20 +19,21 @@ module.exports = {
                 
                 if (error) {
                   console.error(error);
+                  const errName = args.length > 0 ? args[0] : message.author.username;
                   return message.channel.send(
-                    `Error fetching Haki points for ${usernameArg}.`,
+                    `Error fetching Haki points for ${errName}.`,
                   );
                 }
 
                 if (!userData) {
-                  return message.channel.send(
-                    `No profile found with username "${usernameArg}".`,
-                  );
+                    if (args.length > 0) return message.channel.send(`No profile found with username "${args[0]}".`);
+
+                    return message.channel.send('No profile linked to your Discord account. Use !link <username> to link.');
                 }
 
             // Display points
             const points = userData.total_haki_points ?? 0;
-            message.channel.send(`${userData.username} has ${points} Haki points. Ranked ${userData.rank} and is # ${userData.row_number} on the [leaderboard](${leaderboardUrl})`);
+            message.channel.send(`${userData.username} has ${points} Haki points. Ranked ${userData.rank} and is #${userData.row_number} on the [leaderboard](${leaderboardUrl})`);
         } catch (err) {
             console.error(err);
             message.channel.send('There was an error processing your request.');
