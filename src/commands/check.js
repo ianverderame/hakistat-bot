@@ -7,57 +7,32 @@ module.exports = {
 
     async execute(message, args) {
         let data;
+        const leaderboardUrl = "https://hakistat.com/points";
 
         try {
-            if (args.length > 0) {
-                // Username provided
-                const usernameArg = args[0];
-
-                const { data: userData, error } = await supabase
-                    .from('profiles')
-                    .select('username, total_haki_points')
-                    .eq('username', usernameArg)
-                    .maybeSingle();
-
+            const {targetCol, target} = args.length > 0 ? {targetCol: 'username', target: args[0]} : {tartargetColgetName: 'discord_id', target: message.author.id};
+            const { data: userData, error } = await supabase
+                .from('ranked_view')
+                .select('username, total_haki_points, rank, row_number')
+                .eq(targetCol, target)
+                .maybeSingle()
+                
                 if (error) {
-                    console.error(error);
-                    return message.channel.send(`Error fetching Haki points for ${usernameArg}.`);
+                  console.error(error);
+                  return message.channel.send(
+                    `Error fetching Haki points for ${usernameArg}.`,
+                  );
                 }
 
                 if (!userData) {
-                    return message.channel.send(`No profile found with username "${usernameArg}".`);
+                  return message.channel.send(
+                    `No profile found with username "${usernameArg}".`,
+                  );
                 }
-
-                data = userData;
-            } else {
-                // No username provided, use message author
-                const discordId = message.author.id;
-
-                const { data: userData, error } = await supabase
-                    .from('profiles')
-                    .select('username, total_haki_points')
-                    .eq('discord_id', discordId)
-                    .maybeSingle();
-
-                if (error) {
-                    console.error(error);
-                    return message.channel.send(
-                        `Error fetching Haki points for ${message.author.username}.`
-                    );
-                }
-
-                if (!userData) {
-                    return message.channel.send(
-                        `No profile linked to your Discord account. Use !link <username> to link.`
-                    );
-                }
-
-                data = userData;
-            }
 
             // Display points
-            const points = data.total_haki_points ?? 0;
-            message.channel.send(`${data.username} has ${points} Haki points.`);
+            const points = userData.total_haki_points ?? 0;
+            message.channel.send(`${userData.username} has ${points} Haki points. Ranked ${userData.rank} and is # ${userData.row_number} on the [leaderboard](${leaderboardUrl})`);
         } catch (err) {
             console.error(err);
             message.channel.send('There was an error processing your request.');
