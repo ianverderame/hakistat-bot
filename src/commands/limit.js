@@ -59,28 +59,37 @@ module.exports = {
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0);
 
-            const { data: todayLogs, error: logsError } = await supabase
+            const { data: todayGambleLogs, error: gambleLogsError } = await supabase
                 .from('haki_point_transactions')
                 .select('points_delta')
                 .eq('user_id', userData.user_id)
                 .eq('source', 'gamble')
                 .gte('created_at', todayStart.toISOString());
 
-            if (logsError) {
-                console.error(logsError);
+            const { data: todayReactionLogs, error: reactionLogsError } = await supabase
+                .from('haki_point_transactions')
+                .select('points_delta')
+                .eq('user_id', userData.user_id)
+                .eq('source', 'discord_reaction')
+                .gte('created_at', todayStart.toISOString());
+
+            if (gambleLogsError || reactionLogsError) {
+                console.error(gambleLogsError || reactionLogsError);
                 return message.channel.send('Error fetching transaction history.');
             }
 
-            const todayProfit = todayLogs.reduce((sum, log) => sum + log.points_delta, 0);
-            const startingBalance = currentPoints - todayProfit;
+            const todayGambleProfit = todayGambleLogs.reduce((sum, log) => sum + log.points_delta, 0);
+            const todayReactionGains = todayReactionLogs.reduce((sum, log) => sum + log.points_delta, 0);
+
+            const startingBalance = currentPoints - todayGambleProfit - todayReactionGains;
             const dailyCap = Math.floor(startingBalance * 0.5);
-            const remaining = Math.max(0, dailyCap - todayProfit);
+            const remaining = Math.max(0, dailyCap - todayGambleProfit);
 
             message.channel.send(
                 `📊 **${userData.username}'s Gambling Limit**\n` +
                 `Starting balance today: **${startingBalance}** haki points\n` +
                 `Daily profit cap: **${dailyCap}** haki points\n` +
-                `Profit so far today: **${todayProfit}** haki points\n` +
+                `Gamble profit so far today: **${todayGambleProfit}** haki points\n` +
                 `Remaining: **${remaining}** haki points`
             );
 
