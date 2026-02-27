@@ -97,7 +97,7 @@ module.exports = {
                 );
             } else {
                 message.channel.send(
-                    `🪙 **Coinflip — LOSS!**\n${userData.username} gambled **${bet}** points and lost. (-${bet})\nNew balance: **${newPoints}** haki points.`
+                  `🪙 **Coinflip — LOSS!**\n${userData.username} gambled **${bet}** points and lost. (-${bet})\nNew balance: **${newPoints}** haki points.\n If you have a gambling problem, please call the National Problem Gambling Helpline™ (1-800-MY-RESET) `,
                 );
             }
                 // Log transaction
