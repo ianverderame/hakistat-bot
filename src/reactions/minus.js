@@ -1,10 +1,10 @@
+const emojis = require("../utils/emojis");
+
 module.exports = {
     name: 'subtract Haki point',
-    plusEmoji: 'emoji_2',
-    minusEmoji: 'emoji_1',
 
     executeAdd: async (reaction, user, supabase) => {
-        if (reaction.emoji.name !== module.exports.minusEmoji) return;
+        if (reaction.emoji.id !== emojis.minusEmojiID) return;
         const messageAuthor = reaction.message.author;
 
         const { data: profile, error } = await supabase
@@ -33,11 +33,11 @@ module.exports = {
             .update({ total_haki_points: currentTotal - 1 })
             .eq('user_id', profile.user_id);
 
-        console.log(`-1 Haki to ${messageAuthor.username} from ${user.username} via ${module.exports.minusEmoji}`);
+        console.log(`-1 Haki to ${messageAuthor.username} from ${user.username} via ${reaction.emoji.name}`);
     },
 
     executeRemove: async (reaction, user, supabase) => {
-        if (reaction.emoji.name !== module.exports.plusEmoji) return;
+        if (reaction.emoji.id !== emojis.plusEmojiID) return;
 
         const messageAuthor = reaction.message.author;
 
@@ -57,7 +57,7 @@ module.exports = {
             .insert({
                 user_id: profile.user_id,
                 points_delta: -1,
-                reason: '-1 haki point (emoji_1 removed)',
+                reason: '-1 haki point (+ 1 haki point emoji removed)',
                 awarded_by: user.username,
                 source: 'discord_reaction'
             });
@@ -67,6 +67,6 @@ module.exports = {
             .update({ total_haki_points: currentTotal - 1 })
             .eq('user_id', profile.user_id);
 
-        console.log(`-1 Haki to ${messageAuthor.username} from ${user.username} via removal of ${module.exports.plusEmoji}`);
+        console.log(`-1 Haki to ${messageAuthor.username} from ${user.username} via removal of ${reaction.emoji.name}`);
     }
 };
