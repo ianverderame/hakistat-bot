@@ -1,12 +1,13 @@
+const emojis = require("../utils/emojis");
+const hakiID = "1069683217420005518";
+
 module.exports = {
   name: "Angrycat points",
-  hakiID: "1069683217420005518",
 
   executeAdd: async (reaction, user, supabase) => {
-    const emojis = require("../utils/emojis");
     if (reaction.emoji.id !== emojis.angrycatEmojiID) return;
     
-    if (user.id !== module.exports.hakiID) return;
+    if (user.id !== hakiID) return;
 
     const messageAuthor = reaction.message.author;
 
@@ -36,14 +37,16 @@ module.exports = {
       .eq("user_id", profile.user_id);
 
     console.log(
-      `-50 Haki to ${messageAuthor.username} from ${user.username} via angrycat`,
+      `-50 Haki to ${messageAuthor.username} from ${user.username} via ${reaction.emoji.name}`,
     );
   },
 
   executeRemove: async (reaction, user, supabase) => {
     if (reaction.emoji.id !== emojis.angrycatEmojiID) return;
 
-    if (user.id !== module.exports.hakiID) return;
+    if (user.id !== hakiID) return;
+
+    const messageAuthor = reaction.message.author;
 
     const { data: profile, error } = await supabase
       .from("profiles")
@@ -71,7 +74,7 @@ module.exports = {
       .eq("user_id", profile.user_id);
 
     console.log(
-      `+50 Haki to ${messageAuthor.username} from ${user.username} via removal of angrycat`,
+      `+50 Haki to ${messageAuthor.username} from ${user.username} via removal of ${reaction.emoji.name}`,
     );
   },
 };
