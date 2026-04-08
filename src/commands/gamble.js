@@ -3,18 +3,25 @@ const supabase = require('../utils/supabase');
 const NEGATIVE_BALANCE_WIN_CHANCE = 0.05;
 const NEGATIVE_BALANCE_MAX_BET = 10; // max bet for users with negative points
 const DEFAULT_WIN_CHANCE = 0.5;
+const hundredEmoji = '💯';
 
 module.exports = {
     name: 'gamble',
     description: 'Gamble your haki points on a coinflip!',
-    usage: '!gamble <points>',
+    usage: '!gamble <points | 💯 for all-in>',
 
     async execute(message, args) {
         const discordId = message.author.id;
 
+        if (args[0] === hundredEmoji) {
+            console.log("HUNNID");
+        }
+
         const bet = parseInt(args[0]);
         if (!args[0] || isNaN(bet) || bet <= 0) {
-            return message.channel.send('Please provide a valid amount to gamble. Usage: `!gamble <points>`');
+            if (args[0] !== hundredEmoji) {
+                return message.channel.send('Please provide a valid amount to gamble. Usage: `!gamble <points>`');
+            }
         }
 
         try {
@@ -35,6 +42,7 @@ module.exports = {
 
             const currentPoints = userData.total_haki_points ?? 0;
             const isNegative = currentPoints <= 0;
+            const allIn = args[0] === hundredEmoji;
 
             if (!isNegative){
                 // Check daily profit cap
@@ -73,14 +81,20 @@ module.exports = {
                 }
             }
 
+            const finalBet = allIn
+              ? isNegative
+                ? NEGATIVE_BALANCE_MAX_BET
+                : currentPoints
+              : bet;
+
             // Apply restrictions for users with negative balance
-            if (isNegative && bet > NEGATIVE_BALANCE_MAX_BET) {
+            if (isNegative && finalBet > NEGATIVE_BALANCE_MAX_BET) {
                 return message.channel.send(
                     `⚠️ Users with a negative balance can only bet up to **${NEGATIVE_BALANCE_MAX_BET}** haki points.`
                 );
             }
 
-            if (!isNegative && bet > currentPoints) {
+            if (!isNegative && finalBet > currentPoints) {
                 return message.channel.send(
                     `You don't have enough haki points! You only have **${currentPoints}** points.`
                 );
@@ -88,7 +102,7 @@ module.exports = {
 
             const winChance = isNegative ? NEGATIVE_BALANCE_WIN_CHANCE : DEFAULT_WIN_CHANCE;
             const won = Math.random() < winChance;
-            const newPoints = won ? currentPoints + bet : currentPoints - bet;
+            const newPoints = won ? currentPoints + finalBet : currentPoints - finalBet;
 
             const { error: updateError } = await supabase
                 .from('profiles')
@@ -102,11 +116,11 @@ module.exports = {
 
             if (won) {
                 message.channel.send(
-                    `🪙 **Coinflip — WIN!**\n${userData.username} gambled **${bet}** points and won! (+${bet})\nNew balance: **${newPoints}** haki points.`
+                    `🪙 **Coinflip — WIN!**\n${userData.username} gambled **${finalBet}** points and won! (+${finalBet})\nNew balance: **${newPoints}** haki points.`
                 );
             } else {
                 message.channel.send(
-                  `🪙 **Coinflip — LOSS!**\n${userData.username} gambled **${bet}** points and lost. (-${bet})\nNew balance: **${newPoints}** haki points.\n If you have a gambling problem, please call the National Problem Gambling Helpline™ (1-800-MY-RESET) `,
+                  `🪙 **Coinflip — LOSS!**\n${userData.username} gambled **${finalBet}** points and lost. (-${finalBet})\nNew balance: **${newPoints}** haki points.\n If you have a gambling problem, please call the National Problem Gambling Helpline™ (1-800-MY-RESET) `,
                 );
             }
                 // Log transaction
@@ -114,8 +128,8 @@ module.exports = {
                 .from('haki_point_transactions')
                 .insert({
                     user_id: userData.user_id,
-                    points_delta: won ? bet : -bet,
-                    reason: `Coinflip — ${won ? 'Win' : 'Loss'} (bet ${bet})`,
+                    points_delta: won ? finalBet : -finalBet,
+                    reason: `Coinflip — ${won ? 'Win' : 'Loss'} (bet ${finalBet})`,
                     awarded_by: 'hakistat bot',
                     source: 'gamble'
                 });
