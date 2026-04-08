@@ -3,6 +3,7 @@ const hakiID = "1069683217420005518";
 
 const restrictedEmojis = {};
 restrictedEmojis[emojis.angrycatEmojiID] = { points: -50, user_id: hakiID };
+restrictedEmojis[emojis.yaycatEmojiID] = { points: 50, user_id: hakiID };
 restrictedEmojis[emojis.hakistatcomEmojiID] = { points: 100, user_id: hakiID };
 
 module.exports = {
